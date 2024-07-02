@@ -1,7 +1,7 @@
 import numpy as np
 import shutil
 import tifffile as tif
-from PIL import Image
+from PIL import Image, ImageTk
 import tkinter as tk
 import tkinter.ttk as ttk
 import skimage.io
@@ -16,8 +16,13 @@ import re
 window_name = "ImgMax"
 icon_path = "icon.ico"
 
+
+bg_color ='#282729'
+input_color = "#414042"
+font_color = "white"
+
 # Defaults for testing
-test_regex = "^(?P<Well>[A-Z] - [0-9]{2})\(fld (?P<Field>[0-9]{1,3}) wv (?P<Wavelength>[0-9]{1,4}) - (?P<Channel>.*) z (?P<Z>[0-9]{1,3})\).tif"
+test_regex = r"^(?P<Well>[A-Z] - [0-9]{2})\(fld (?P<Field>[0-9]{1,3}) wv (?P<Wavelength>[0-9]{1,4}) - (?P<Channel>.*) z (?P<Z>[0-9]{1,3})\).tif"
 
 def get_meta_table(path, regex):
     groups = re.findall(r'\<.*?\>', regex)
@@ -70,7 +75,7 @@ def create_max_projections(uid_metadata, channel_ID, img_dir):
                 stack_output_file = f"temp/{stack}_{channel}.tif"
                 with tif.TiffWriter(stack_output_file) as tif_stack:
                     for i in paths:              
-                        tif_stack.save(tif.imread(i), photometric='minisblack', contiguous=True)
+                        tif_stack.write(tif.imread(i), photometric='minisblack', contiguous=True)
                 
                 max_stack = skimage.io.imread(stack_output_file)
                 max_proj = np.max(max_stack, axis=0)
@@ -89,17 +94,22 @@ class chooseImages():
     def __init__(self):
         window = tk.Tk()
         window.title(window_name)
-        window.geometry('600x300')
+        window.configure(background=bg_color)
+        window.geometry('575x250')
         window.iconbitmap(icon_path)
-        
-        path_box = tk.Entry(window,font=40, width=50)
+        window.resizable(False, False)
 
-        path_box.grid(row=2,column=2)
+        logo_img = ImageTk.PhotoImage(Image.open("assets/logo.png"))
+        panel = tk.Label(window, image = logo_img, bg='#282729')
+        panel.grid(row=1,column=1)
 
-        img_listbox = tk.Listbox(window, height = 10, width = 65,
-                  activestyle = 'dotbox', font = "Helvetica")
+        path_box = tk.Entry(window,font=40, width=37, bg=bg_color, fg=font_color)
+        path_box.grid(row=1,column=2)
 
-        img_listbox.grid(row=3,column=2, columnspan = 5)
+        img_listbox = tk.Listbox(window, height = 10, width = 63, fg=font_color,
+                  activestyle = 'dotbox', font = "Helvetica", bg="#414042")
+
+        img_listbox.grid(row=2,column=1, columnspan = 4)
 
         def browsefunc():
             directory = tk.filedialog.askdirectory()
@@ -113,16 +123,18 @@ class chooseImages():
             img_listbox.delete(0, 'end')
             img_listbox.insert("end", *img_list)
 
-        browse_but = tk.Button(window,text="Browse",font=40,command=browsefunc)
-        browse_but.grid(row=2,column=4)
+
+        browse_img = ImageTk.PhotoImage(Image.open("assets/browse.png"))
+        browse_but = tk.Button(window, command=browsefunc, image=browse_img, highlightthickness=0, bd=0, bg=bg_color)
+        browse_but.grid(row=1,column=3)
     
         def submitfunc():     
             window.destroy()
             createSets(path)
 
-
-        submit_but = tk.Button(window,text="Submit",font=40,command=submitfunc)
-        submit_but.grid(row=2,column=5)
+        submit_img = ImageTk.PhotoImage(Image.open("assets/submit.png"))
+        submit_but = tk.Button(window,command=submitfunc, image=submit_img, highlightthickness=0, bd=0, bg=bg_color)
+        submit_but.grid(row=1,column=4)
         window.mainloop()
 
 class createSets():
@@ -130,22 +142,31 @@ class createSets():
         window = tk.Tk()
         window.title(window_name)
         window.geometry('1200x800')
+        window.configure(bg=bg_color)
         window.iconbitmap(icon_path)
         
 
+        logo_img = ImageTk.PhotoImage(Image.open("assets/logo.png"))
+        panel = tk.Label(window, image = logo_img, bg='#282729')
+        panel.grid(row=1,column=1)
+
+
+
         # Initilise the frame and extraction table
-        table_frame = tk.Frame(window)
-        table_frame.grid(row=2,column=1, columnspan=3, rowspan=4)
+        table_frame = tk.Frame(window, width=10)
+        
         df = pd.DataFrame([])
-        table = pt.Table(table_frame, dataframe=df, showtoolbar=False, showstatusbar=True)
+        table_frame.grid(row=2,column=1, columnspan=3, rowspan=4)
+
+        table = pt.Table(table_frame, dataframe=df, showtoolbar=False, showstatusbar=True, width=600, height=300)
         table.show()
-        table.showIndex()
+        
 
         # Initilise the regular expression frame and input
 
 
-        regex_entry = tk.Entry(window, width = 70)
-        regex_entry.grid(row=1,column=1)
+        regex_entry = tk.Entry(window, width = 70, bg=input_color, fg=font_color)
+        regex_entry.grid(row=1,column=2)
         regex_entry.insert('end', test_regex)
           
         # Initilise the 'Check' Button and command
@@ -154,36 +175,34 @@ class createSets():
                 regex = regex_entry.get()
                 global metadata
                 metadata = get_meta_table(path, regex)
-                table.model.df = metadata
+                table.model.df = metadata.reset_index()
                 table.redraw()
+                group_select.delete(0, 'end')
+                group_select.insert("end", *list(metadata.columns))
+                channel_select['values'] = list(metadata.columns)
 
             except: 
                 write_console("Regular Expression Error")
 
-        check_but = tk.Button(window,text="Check",font=40,command=checkfunc)
-        check_but.grid(row=1,column=2)
-        
-        # Initilise the 'Submit' Button and command
-        def submitfunc():   
-            group_select.delete(0, 'end')
-            group_select.insert("end", *list(metadata.columns))
-            channel_select['values'] = list(metadata.columns)
-            
-        submit_but = tk.Button(window,text="Submit",font=40,command=submitfunc)
-        submit_but.grid(row=1,column=3)
 
+        check_img = ImageTk.PhotoImage(Image.open("assets/check.png"))
+        
+        check_but = tk.Button(window,command=checkfunc, image=check_img, highlightthickness=0, bd=0, bg=bg_color)
+        check_but.grid(row=1,column=3)
+        
+     
         variable = tk.StringVar(window)
         variable.set("Channel")
 
         # Initilise the Channel Selector
-        tk.Label(window, text = "Channel Identifier:").grid(row=1,column=4)
+        tk.Label(window, text = "Channel Identifier:", bg=bg_color, fg=font_color).grid(row=1,column=4)
 
         n = tk.StringVar() 
         channel_select = ttk.Combobox(window, textvariable=n)
         channel_select.grid(row=2,column=4)
 
         choices = []
-        tk.Label(window, text = "Group By: \n Usually Well and Field/Position").grid(row=3,column=4)
+        tk.Label(window, text = "Group By: \n Usually Well and Field/Position", bg=bg_color, fg=font_color).grid(row=3,column=4)
         
         group_select = tk.Listbox(window, listvariable=choices, height=7, selectmode='multiple' )
         group_select.grid(row=4,column=4, rowspan=1, columnspan=2,sticky="N")
@@ -206,10 +225,12 @@ class createSets():
 
 
         # Initilise the console box
+        tk.Label(window, text = "OUTPUT:", bg=bg_color, fg=font_color).grid(row=6,column=1)
+
         global console
         console = ScrolledText(window, width=100, height=15)
-    
-        console.grid(row=6,column=1, columnspan=4)
+            
+        console.grid(row=7,column=1, columnspan=4)
         console.configure(state ='disabled') 
 
         window.mainloop()
