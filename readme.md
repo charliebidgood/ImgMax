@@ -16,7 +16,7 @@ How to use:
 ![image](readme_img/regex.png)
 
 
-5. Select the single element which defines your multi-colour channels used to obtain the images . This is important so you don't merge images with different channels (Brightfield, DAPI, FITC, Cy3, Cy5) together.
+5. Select the single element which defines your multi-colour channels used to obtain the images . This is important so you don't merge images with different channels (e.g. Brightfield, DAPI, FITC, Cy3, Cy5) together.
 ![image](readme_img/channel.png)
 
 
