@@ -1,4 +1,4 @@
-![image](assets/logo.png)
+![image](readme_img/logo.png)
 ### Rapidly generate maximum intensity projections (MIPs) from an image directory of multi-colour .tif images
 
 How to use:
