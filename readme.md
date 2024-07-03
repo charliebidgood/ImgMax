@@ -20,7 +20,7 @@ How to use:
 ![image](readme_img/channel.png)
 
 
-6. Select the elements which define unique image groups. In this instance it's 'well' and 'field'. Tip: If you were to only select 'well' you would accidentally merge all images in each well together.
+6. Select the elements which define unique image groups. In this instance it's 'well' and 'field'. Tip: If you were to only select 'well' you would accidentally merge all images in each well together and ruin the run.
 ![image](readme_img/run.png)
 
 7. If done correctly ImgMax will rapidly create a MIPs each image group and channel and save the new maximum_projection directory next to the original image directory.
