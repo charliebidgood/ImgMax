@@ -1,0 +1,1 @@
+pyinstaller --onefile --hiddenimport=scipy._lib.array_api_compat.numpy.fft imgmax.py

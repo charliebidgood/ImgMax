@@ -1,0 +1,7 @@
+numpy
+tifffile
+pillow
+scikit-image
+pandas
+pandastable
+pyinstaller

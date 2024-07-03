@@ -1,7 +1,6 @@
 import numpy as np
 import shutil
 import tifffile as tif
-from PIL import Image, ImageTk
 import tkinter as tk
 import tkinter.ttk as ttk
 import skimage.io
@@ -9,12 +8,13 @@ import pandas as pd
 import pandastable as pt
 import tkinter.filedialog
 from tkinter.scrolledtext import ScrolledText
+from PIL import Image, ImageTk
 import os
 import re
 
 ############ CONFIG ############
 window_name = "ImgMax"
-icon_path = "icon.ico"
+icon_path = "assets/icon.ico"
 bg_color ='#282729'
 input_color = "#414042"
 font_color = "white"
@@ -138,7 +138,7 @@ class createSets():
     def __init__(self, path):
         window = tk.Tk()
         window.title(window_name)
-        window.geometry('1200x800')
+        window.geometry('850x650')
         window.configure(bg=bg_color)
         window.iconbitmap(icon_path)
         
